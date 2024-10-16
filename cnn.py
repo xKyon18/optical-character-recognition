@@ -32,6 +32,7 @@ class MaxPool:
                 yield imgReg, rows, cols
     
     def forward(self, input):
+        self.cacheInput = input
         height, width, filters = input.shape
         output = np.zeros((height // 2, width // 2, filters))
         for imgReg, rows, cols in self.iterateRegion(input):
@@ -39,18 +40,52 @@ class MaxPool:
         return output
     
     def backprop(self, gradient):
-        pass
-
+        dL_din = np.zeros((self.cacheInput.shape))
+        for imgReg, rows, cols in self.iterateRegion(self.cacheInput):
+            amax = np.amax(imgReg, axis=(0, 1)
+            for imgrRows in range(imgReg.shape[0]):
+                for imgrCols in range(imgReg.shape[1]):
+                    for imgrFilt in range(imgReg.shape[2]):
+                        if imgReg[imgrRows, imgrCols, imgrFilters] == amax[imgrFilt]:
+                            dL_din[(rows * 2) + imgrRows, (cols * 2) + imgrCols, imgrFilt] = gradient[rows, cols, imgrFilt]
+        return dL_din
+        
 class Softmax:
     def __init__(self, inputLen, nodes):
         self.weight = np.random.randn(inputLen, nodes) / inputLen
         self.bias = np.zeros(nodes)
 
     def forward(self, input):
+        self.cacheShape = input.shape
         input = input.flatten()
+        self.cacheInput = input
         total = input @ self.weight + self.bias
+        self.cacheTotal = total
         exp = np.exp(total)
         return exp / (np.sum(exp))
     
-    def backprop(self, gradient):
-        pass
+    def backprop(self, gradient, learnRate):
+        for c, dL_dout in enumerate(gradient):
+            if dL_dout == 0:
+                continue
+            exp = np.exp(self.cacheTotal)
+            expSum = np.sum(exp)
+            dout_dt = np.zeros((self.cacheTotal.shape))
+            dout_dt[c] = (exp[c] * (expSum - exp)) / expSum ** 2
+
+            dL_dt = dL_dout * dout_dt #(10,)
+
+            dt_dw = self.cacheInput #(1690,)
+            dt_db = 1
+            dt_din = self.weight #(1690, 10)
+
+            dL_dw = dt_din[np.newaxis].T @ dl_dt[np.newaxis]
+            dL_db = dL_dt
+            dL_din = dt_din @ dL_dt
+
+            self.weight -= learnRate * dL_dw
+            self.bias -= learnRate * dL_db
+
+            return dL_din.reshape(self.cacheShape)
+            
+            

@@ -14,10 +14,10 @@ def loadLabels(filename):
         labels = np.fromfile(file, dtype=np.uint8)
         return labels
     
-trainImages = loadImages('train-images.idx3-ubyte')[:200]
-trainLabels = loadLabels('train-labels.idx1-ubyte')[:200]
-testImages = loadImages('t10k-images.idx3-ubyte')
-testLabels = loadLabels('t10k-labels.idx1-ubyte')
+trainImages = loadImages('train-images.idx3-ubyte')[:400]
+trainLabels = loadLabels('train-labels.idx1-ubyte')[:400]
+testImages = loadImages('t10k-images.idx3-ubyte')[:400]
+testLabels = loadLabels('t10k-labels.idx1-ubyte')[:400]
 
 conv = Conv(10)
 pool = MaxPool()

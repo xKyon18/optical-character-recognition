@@ -14,14 +14,20 @@ class Conv:
                 yield imgReg, rows, cols
 
     def forward(self, input):
+        self.cacheInput = input
         height, width = input.shape
         output = np.zeros((height - 2, width - 2, self.numFilters))
         for imgReg, rows, cols in self.iterateRegion(input):
             output[rows, cols] = np.sum(imgReg * self.filters, axis=(1, 2))
         return output
     
-    def backprop(self, gradient):
-        pass
+    def backprop(self, gradient, learnRate):
+        dL_dfil = np.zeros(self.filters.shape)
+        for imgRes, rows, cols in self.iterateRegion(self.cacheInput):
+            for filt in range(self.numFilters):
+                dL_dfil[filt] = gradient[rows, cols, filt] * imgRes
+        self.weight -= learnRate * dL_din
+        return
 
 class MaxPool:
     def iterateRegion(self, image):

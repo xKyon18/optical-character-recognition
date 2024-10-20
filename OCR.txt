@@ -1,0 +1,21 @@
+This application leverages a Convolutional Neural Network (CNN) to predict handwritten digits drawn by the user on an interactive canvas. 
+Users can draw a number (from 0 to 9) on the canvas, and the CNN model processes the input image in real-time. After submitting the drawing, 
+the app converts the canvas into a format suitable for prediction, rescaling and preprocessing the image before passing it through the trained CNN. T
+he model then analyzes the features of the drawing—such as edges, shapes, and textures—through its multiple convolutional layers and predicts the number.
+
+Key functionalities of the app include:
+
+Interactive Drawing Canvas: Users can freely draw numbers using a brush tool, simulating the input for handwritten digit recognition.
+
+Real-Time Prediction: Upon submission, the drawing is processed and a prediction is made by the CNN, displaying the result instantly.
+
+Clear and Reset Option: Users can clear the canvas to draw new numbers or restart the process.
+
+Training and Accuracy: The app also has functionality for training the model and displaying prediction accuracy.
+
+This app demonstrates the practical use of neural networks in handwriting recognition, a field with real-world applications such as 
+digitizing handwritten content, check processing, and form data extraction.
+
+
+Create window for epochs, learnrate and sample size
+create window for training

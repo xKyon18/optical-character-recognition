@@ -1,10 +1,13 @@
 from tkinter import *
+from tkinter import messagebox
+from tkinter.ttk import Progressbar
 from PIL import Image, ImageGrab, ImageOps
 from cnn import Conv, MaxPool, Softmax
 import numpy as np
 import matplotlib.pyplot as plt
 import struct
 import time
+
 
 def loadImages(filename):
     with open(filename, 'rb') as file:
@@ -39,7 +42,6 @@ def forward(image, label=None, predict=False):
     acc = 1 if np.argmax(output) == label else 0
     
     return output, loss, acc
-
 
 def training(image, label, learnRate):
     output, loss, acc = forward(image, label)
@@ -102,24 +104,36 @@ def startUp():
     learnInput.grid(row=0, column=3)
 
     startTrain = Button(win, text='Initialize', font=('Tahoma', 10), width=10, 
-                        command=lambda: (win.withdraw(), initTrain(int(epochInput.get()), float(learnInput.get()), int(batchInput.get()))))
+                        command=lambda: (win.withdraw(), 
+                                         initTrain(int(epochInput.get()), 
+                                                   float(learnInput.get()), 
+                                                   int(batchInput.get())
+                                                   )))
     startTrain.grid(row=1, column=2, columnspan=2)
 
 def initTrain(epoch, learnRate, batchSize):
-
+    global front
     trainImages = loadImages('train-images.idx3-ubyte')[:batchSize]
     trainLabels = loadLabels('train-labels.idx1-ubyte')[:batchSize]
     testImages = loadImages('t10k-images.idx3-ubyte')[:batchSize]
     testLabels = loadLabels('t10k-labels.idx1-ubyte')[:batchSize]
+    Label(front, text='MNIST Initialized!', font=('Tahoma', 12)).grid(row=5, column=0, columnspan=2, pady=10, padx=15)
+    front.update()
 
-    Label(front, text='MNIST Initialized!', font=('Tahoma', 10)).grid(row=4, column=0, pady=20, padx = 15, sticky=W)
-    '''start = time.perf_counter()
+    start = time.perf_counter()
     for i in range(epoch):
         print('--- Epoch %d ---' % (i + 1))
 
         permutation = np.random.permutation(len(trainImages))
         trainImages = trainImages[permutation]
         trainLabels = trainLabels[permutation]
+
+        message = Label(front, text=f'Training Phase: Epoch {i + 1}', font=('Tahoma', 10))
+        message.grid(row=6, column=0, pady=5, padx=15, sticky=W)
+        bar = Progressbar(front, orient=HORIZONTAL, length=400, maximum=(batchSize // 100), mode='determinate')
+        bar.grid(row=7, column=0, columnspan=2, pady=5, padx=15)
+        step = Label(front)
+        front.update()
 
         loss = 0
         num_correct = 0
@@ -129,7 +143,11 @@ def initTrain(epoch, learnRate, batchSize):
                     '[Step %d] Past 100 steps: Average Loss %.3f | Accuracy: %d%%' %
                     (i + 1, loss / 100, num_correct)
                 )
-                if num_correct == 100: break
+                bar['value'] += 1
+                #Label(front, text=f'{i // 30}%', font=('Tahoma', 10)).grid(row=7, column=0, columnspan=2, pady=5, padx=15)
+                step.config(text=f'[Step {i + 1}] Past 100 steps: Average Loss {loss / 100: .3f} | Accuracy: {num_correct}%',  font=('Tahoma', 10))
+                step.grid(row=8, column=0, columnspan=2, pady=5, padx=15)
+                front.update()
                 loss = 0
                 num_correct = 0
 
@@ -140,7 +158,11 @@ def initTrain(epoch, learnRate, batchSize):
     end = time.perf_counter()
     print(f'Training Runtime: {(end - start):.4f} seconds')
 
-    print('\n--- Testing the CNN ---')
+    time.sleep(1)
+
+    message.config(text='Testing Phase')
+    step.config(text='')
+    front.update()
     loss = 0
     num_correct = 0
     for im, label in zip(testImages, testLabels):
@@ -150,12 +172,11 @@ def initTrain(epoch, learnRate, batchSize):
 
     num_tests = len(testImages)
     print('Test Loss:', loss / num_tests)
-    print('Test Accuracy:', num_correct / num_tests)'''
+    print('Test Accuracy:', num_correct / num_tests)
 
-    #accu.set(f'Accuracy: {(num_correct / num_tests) * 100}%')
-
-
-    #back.tkraise()
+    messagebox.showinfo(title='Done', message=f'Done Training with accuracy of {(num_correct / num_tests) * 100: .2f}% \n Elapsed time: {(end - start):.2f} seconds')
+    accu.set(f'Accuracy:{(num_correct / num_tests) * 100: .1f}%')
+    back.tkraise()
 
 def trainCanvas(label, learnRate):
     x = window.winfo_rootx() + canvas.winfo_x()
@@ -167,7 +188,7 @@ def trainCanvas(label, learnRate):
     resImage = image.resize((28, 28))
     imgArr = np.array(resImage, dtype=np.uint8)[:, :, 0]
     _, _ = training(imgArr, label, learnRate)
-    print("Done Training")
+    messagebox.showinfo(title='Success', message='Training Success')
     
 def inputLabel():
     win = Toplevel()
@@ -185,10 +206,10 @@ def inputLabel():
     submit.grid(row=0, column=2, columnspan=2, padx=30)
 
 window = Tk()
-window.geometry("440x320")
+window.geometry("450x320")
 window.title("OCR")
-#icon = PhotoImage(file='ocr.png')
-#window.iconphoto(True, icon)
+icon = PhotoImage(file='ocr.png')
+window.iconphoto(True, icon)
 window.resizable(False, False)
 
 front = Frame(window)

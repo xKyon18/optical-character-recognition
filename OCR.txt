@@ -19,4 +19,5 @@ digitizing handwritten content, check processing, and form data extraction.
 
 Create window for epochs, learnrate and sample size DONE
 create window for training DONE
-create progress bar on initial training of MNIST data.
+create progress bar on initial training of MNIST data. DONE
+Debug train canvas

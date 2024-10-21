@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import struct
 import time
 
-'''def loadImages(filename):
+def loadImages(filename):
     with open(filename, 'rb') as file:
         magic, num, rows, cols = struct.unpack('>IIII', file.read(16))
         images = np.fromfile(file, dtype=np.uint8).reshape(num, rows, cols)
@@ -41,7 +41,7 @@ def forward(image, label=None, predict=False):
     return output, loss, acc
 
 
-def training(image, label, learnRate=0.005):
+def training(image, label, learnRate):
     output, loss, acc = forward(image, label)
 
     gradient = np.zeros(10)
@@ -53,47 +53,8 @@ def training(image, label, learnRate=0.005):
 
     return loss, acc
 
-
-print('MNIST CNN initialized!')
-start = time.perf_counter()
-for epoch in range(3):
-  print('--- Epoch %d ---' % (epoch + 1))
-
-  permutation = np.random.permutation(len(trainImages))
-  trainImages = trainImages[permutation]
-  trainLabels = trainLabels[permutation]
-
-  loss = 0
-  num_correct = 0
-  for i, (im, label) in enumerate(zip(trainImages, trainLabels)):
-    if i > 0 and i % 100 == 99:
-        print(
-            '[Step %d] Past 100 steps: Average Loss %.3f | Accuracy: %d%%' %
-            (i + 1, loss / 100, num_correct)
-        )
-        if num_correct == 100: break
-        loss = 0
-        num_correct = 0
-
-    l, acc = training(im, label)
-    loss += l
-    num_correct += acc
-end = time.perf_counter()
-print(f'Training Runtime: {(end - start):.4f} seconds')
-
-print('\n--- Testing the CNN ---')
-loss = 0
-num_correct = 0
-for im, label in zip(testImages, testLabels):
-  _, l, acc = forward(im, label)
-  loss += l
-  num_correct += acc
-
-num_tests = len(testImages)
-print('Test Loss:', loss / num_tests)
-print('Test Accuracy:', num_correct / num_tests)'''
-
 BRUSH_SIZE = 12
+
 def draw(event):
     x = event.x
     y = event.y
@@ -103,9 +64,9 @@ def draw(event):
 
 def clearCanvas():
     canvas.delete("all")
-    res.set("Result: ")
+    res.set("Result: ") 
 
-def submitCanvas():
+def predictCanvas():
     x = window.winfo_rootx() + canvas.winfo_x()
     y = window.winfo_rooty() + canvas.winfo_y()
     x1 = x + canvas.winfo_width()
@@ -114,11 +75,8 @@ def submitCanvas():
     image = ImageOps.fit(image, (280, 280))
     resImage = image.resize((28, 28))
     imgArr = np.array(resImage, dtype=np.uint8)[:, :, 0]
-    '''predict = forward(imgArr, predict=True)
-    res.set(f"Result: {str(predict)}")'''
-    
-def training():
-    pass
+    predict = forward(imgArr, predict=True)
+    res.set(f"Result: {str(predict)}")
 
 def startUp():
     win = Toplevel()
@@ -131,11 +89,9 @@ def startUp():
     epochInput = Entry(win, textvariable=epochs, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
     epochInput.grid(row=0, column=1)
 
-
     batch = Label(win, text='Batch Size:', font=('Tahoma', 10, 'bold'))
     batch.grid(row=1, column=0, padx=10, pady=8)
     
-
     batchInput = Entry(win, textvariable=batchSize, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
     batchInput.grid(row=1, column=1)
 
@@ -145,14 +101,94 @@ def startUp():
     learnInput = Entry(win, textvariable=learnRate, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
     learnInput.grid(row=0, column=3)
 
-    startTrain = Button(win, text='Initialize', font=('Tahoma', 10), width=10)
-    startTrain.grid(row=1, column=2, columnspan=2) 
+    startTrain = Button(win, text='Initialize', font=('Tahoma', 10), width=10, 
+                        command=lambda: (win.withdraw(), initTrain(int(epochInput.get()), float(learnInput.get()), int(batchInput.get()))))
+    startTrain.grid(row=1, column=2, columnspan=2)
+
+def initTrain(epoch, learnRate, batchSize):
+
+    trainImages = loadImages('train-images.idx3-ubyte')[:batchSize]
+    trainLabels = loadLabels('train-labels.idx1-ubyte')[:batchSize]
+    testImages = loadImages('t10k-images.idx3-ubyte')[:batchSize]
+    testLabels = loadLabels('t10k-labels.idx1-ubyte')[:batchSize]
+
+    Label(front, text='MNIST Initialized!', font=('Tahoma', 10)).grid(row=4, column=0, pady=20, padx = 15, sticky=W)
+    '''start = time.perf_counter()
+    for i in range(epoch):
+        print('--- Epoch %d ---' % (i + 1))
+
+        permutation = np.random.permutation(len(trainImages))
+        trainImages = trainImages[permutation]
+        trainLabels = trainLabels[permutation]
+
+        loss = 0
+        num_correct = 0
+        for i, (im, label) in enumerate(zip(trainImages, trainLabels)):
+            if i > 0 and i % 100 == 99:
+                print(
+                    '[Step %d] Past 100 steps: Average Loss %.3f | Accuracy: %d%%' %
+                    (i + 1, loss / 100, num_correct)
+                )
+                if num_correct == 100: break
+                loss = 0
+                num_correct = 0
+
+            l, acc = training(im, label, learnRate)
+            loss += l
+            num_correct += acc
+
+    end = time.perf_counter()
+    print(f'Training Runtime: {(end - start):.4f} seconds')
+
+    print('\n--- Testing the CNN ---')
+    loss = 0
+    num_correct = 0
+    for im, label in zip(testImages, testLabels):
+        _, l, acc = forward(im, label)
+        loss += l
+        num_correct += acc
+
+    num_tests = len(testImages)
+    print('Test Loss:', loss / num_tests)
+    print('Test Accuracy:', num_correct / num_tests)'''
+
+    #accu.set(f'Accuracy: {(num_correct / num_tests) * 100}%')
+
+
+    #back.tkraise()
+
+def trainCanvas(label, learnRate):
+    x = window.winfo_rootx() + canvas.winfo_x()
+    y = window.winfo_rooty() + canvas.winfo_y()
+    x1 = x + canvas.winfo_width()
+    y1 = y + canvas.winfo_height()
+    image = ImageGrab.grab().crop((x, y, x1, y1))
+    image = ImageOps.fit(image, (280, 280))
+    resImage = image.resize((28, 28))
+    imgArr = np.array(resImage, dtype=np.uint8)[:, :, 0]
+    _, _ = training(imgArr, label, learnRate)
+    print("Done Training")
+    
+def inputLabel():
+    win = Toplevel()
+    win.title('Label')
+    win.geometry('300x50')
+    win.resizable(False, False)
+
+    label = Label(win, text='Label Value:', font=('Tahoma', 10))
+    label.grid(row=0, column=0, padx=10, pady=10, sticky=W)
+
+    labelInput = Entry(win, textvariable=labelValue, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
+    labelInput.grid(row=0, column=1, sticky=W)
+
+    submit = Button(win, text='Submit', command=lambda: (trainCanvas(int(labelInput.get()), int(learnRate.get())), win.withdraw()), font=('Tahoma', 10), width=10)
+    submit.grid(row=0, column=2, columnspan=2, padx=30)
 
 window = Tk()
 window.geometry("440x320")
 window.title("OCR")
-icon = PhotoImage(file='ocr.png')
-window.iconphoto(True, icon)
+#icon = PhotoImage(file='ocr.png')
+#window.iconphoto(True, icon)
 window.resizable(False, False)
 
 front = Frame(window)
@@ -162,15 +198,15 @@ front.grid(row=0, column=0, sticky=NSEW)
 back.grid(row=0, column=0, sticky=NSEW)
 
 ocr = Label(front, text="Optical Character Recognition", font=('Tahoma', 19, 'bold'))
-ocr.grid(row=0, column=0, padx=30, pady=8)
+ocr.grid(row=0, column=0, columnspan=2, padx=30, pady=8)
 
 "This application leverages a Convolutional Neural Network (CNN) to predict handwritten digiys draw by the user on an interactive canvas."
 desc = Label(front, text="This application leverages a Convolutional Neural Network (CNN) \nto predict handwritten digits drawn by the user on an interactive canvas.",
              font=('Tahoma', 10), justify='center')
-desc.grid(row=1, column=0)
+desc.grid(row=1, column=0, columnspan=2)
 
 start = Button(front, text="start", width=10, command=startUp, font=('Tahoma', 10))
-start.grid(row=3, column=0, pady=20)
+start.grid(row=3, column=0, columnspan=2, pady=20)
 
 ###############################################################################################
 
@@ -178,15 +214,15 @@ canvas = Canvas(back, height="280", width="280", bg="#000000", bd=0, highlightth
 canvas.grid(row=0, column=0, padx=20, pady= 20, columnspan=4, rowspan=20)
 canvas.bind('<B1-Motion>', draw)
 
-acc = StringVar()
-acc.set('Accuracy: ')
-accuracy = Label(back, textvariable=acc, width=14, font=('Tahoma', 10), bd=3, anchor=SW)
+accu = StringVar()
+accu.set('Accuracy: ')
+accuracy = Label(back, textvariable=accu, width=14, font=('Tahoma', 10), bd=3, anchor=SW)
 accuracy.grid(row=2, column=4, columnspan=2, sticky=W)
 
-submit = Button(back, text='submit', width=10, command=submitCanvas, font=('Tahoma', 10))
-submit.grid(row=6, column=4, sticky=W)
+predict = Button(back, text='Predict', width=10, command=predictCanvas, font=('Tahoma', 10))
+predict.grid(row=6, column=4, sticky=W)
 
-train = Button(back, text='train', width=10, command=training, font=('Tahoma', 10))
+train = Button(back, text='Train', width=10, command=inputLabel, font=('Tahoma', 10))
 train.grid(row=7, column=4, sticky=W)
 
 res = StringVar()
@@ -194,12 +230,23 @@ res.set("Result: ")
 result = Label(back, textvariable=res, width=14, font=('Tahoma', 10), bd=3, anchor=W)
 result.grid(row=8, column=4, columnspan=2, sticky=W)
 
-clear = Button(back, text='clear', width=10, command=clearCanvas, font=('Tahoma', 10))
+clear = Button(back, text='Clear', width=10, command=clearCanvas, font=('Tahoma', 10))
 clear.grid(row=15, column=4, sticky=W)
 
-exit = Button(back, text='exit', width=10, command=quit, font=('Tahoma', 10))
+exit = Button(back, text='Exit', width=10, command=quit, font=('Tahoma', 10))
 exit.grid(row=16, column=4, sticky=W)
 
+###############################################################################################
 
-front.tkraise()
+epochs = IntVar()
+epochs.set(3)
+batchSize = IntVar()
+batchSize.set(1000)
+learnRate = IntVar()
+learnRate.set(0.005)
+labelValue = IntVar()
+
+###############################################################################################
+
+front.tkraise() 
 window.mainloop()

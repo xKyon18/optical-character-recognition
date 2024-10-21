@@ -121,7 +121,32 @@ def training():
     pass
 
 def startUp():
-    pass
+    win = Toplevel()
+    win.title('Input Hyperparameters')
+    win.geometry('380x80')
+
+    epoch = Label(win, text='Epoch:', font=('Tahoma', 10, 'bold'))
+    epoch.grid(row=0, column=0, padx=10, pady=8, sticky=W)
+
+    epochInput = Entry(win, textvariable=epochs, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
+    epochInput.grid(row=0, column=1)
+
+
+    batch = Label(win, text='Batch Size:', font=('Tahoma', 10, 'bold'))
+    batch.grid(row=1, column=0, padx=10, pady=8)
+    
+
+    batchInput = Entry(win, textvariable=batchSize, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
+    batchInput.grid(row=1, column=1)
+
+    learn = Label(win, text='Learn Rate:', font=('Tahoma', 10, 'bold'))
+    learn.grid(row=0, column=2, padx=10, pady=8)
+    
+    learnInput = Entry(win, textvariable=learnRate, font=('Tahoma', 10), relief=SUNKEN, width=10, justify=RIGHT)
+    learnInput.grid(row=0, column=3)
+
+    startTrain = Button(win, text='Initialize', font=('Tahoma', 10), width=10)
+    startTrain.grid(row=1, column=2, columnspan=2) 
 
 window = Tk()
 window.geometry("440x320")
